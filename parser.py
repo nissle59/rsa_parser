@@ -4,6 +4,8 @@ import warnings
 import requests
 from bs4 import BeautifulSoup
 
+import config
+
 warnings.filterwarnings("ignore")
 class Parser():
     def __init__(self, proxy=None):
@@ -71,12 +73,12 @@ class Parser():
     def single_threaded_parser(self, proxy=None):
         operators = []
         for page in range(self.total_pages_ok):
-            print(f'Go {page+1} of {self.total_pages_ok} ok page...')
+            config.logger.debug(f'Go {page+1} of {self.total_pages_ok} ok page...')
             url = f'{self._base_url}/tables/oto/?pageNumber={page+1}'
             operators.extend(self.parse_page(url,proxy))
 
         for page in range(self.total_pages_bad):
-            print(f'Go {page+1} of {self.total_pages_bad} bad page...')
+            config.logger.debug(f'Go {page+1} of {self.total_pages_bad} bad page...')
             url = f'{self._base_url}/search/oto/{page+1}?otoId=&shortName=&address=&fio=&showCanceled=true'
             operators.extend(self.parse_page(url, proxy))
 
