@@ -52,7 +52,7 @@ def set_items_tuple_create_oto_record(d, multi=False):
     if d['operator_status'] == 'ok':
         d['cancel_at'] = None
     elif d['operator_status'] == 'cancel':
-        d['cancel_at'] = 'CURRENT_TIMESTAMP'
+        d['cancel_at'] = nowdt
     else:
         d['cancel_at'] = None
     if multi is True:
