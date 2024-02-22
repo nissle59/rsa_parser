@@ -1,2 +1,2 @@
 git pull
-docker restart parser_rsa_gibdd
+docker restart parser_rsa
