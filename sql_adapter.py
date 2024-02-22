@@ -31,7 +31,9 @@ def get_insert_query():
                     $4,
                     $5,
                     $6,
-                    $7
+                    $7,
+                    $8::timestamp,
+                    $9::timestamp
                 ) ON CONFLICT (operator_number) DO 
                 UPDATE SET 
                     operator_status=$2, 
@@ -39,13 +41,20 @@ def get_insert_query():
                     operator_address=$4, 
                     operator_phone=$5,
                     operator_email=$6,
-                    operator_site=$7
+                    operator_site=$7,
+                    touched_at=$8::timestamp
             """
     return query
 
 
 def set_items_tuple_create_oto_record(d, multi=False):
-    #nowdt = del_tz(datetime.datetime.now())
+    nowdt = del_tz(datetime.datetime.now())
+    if d['operator_status'] == 'ok':
+        d['cancel_at'] = None
+    elif d['operator_status'] == 'cancel':
+        d['cancel_at'] = 'CURRENT_TIMESTAMP'
+    else:
+        d['cancel_at'] = None
     if multi is True:
         items_tuple = (
             int(d['operator_number']),
@@ -54,7 +63,9 @@ def set_items_tuple_create_oto_record(d, multi=False):
             d['operator_address'],
             d['operator_phone'],
             d['operator_email'],
-            d['operator_site']
+            d['operator_site'],
+            nowdt,
+            d['cancel_at']
         )
     else:
         items_tuple = [
@@ -64,7 +75,9 @@ def set_items_tuple_create_oto_record(d, multi=False):
             d['operator_address'],
             d['operator_phone'],
             d['operator_email'],
-            d['operator_site']
+            d['operator_site'],
+            nowdt,
+            d['cancel_at']
         ]
     return items_tuple
 
@@ -190,13 +203,61 @@ async def create_oto(d):
 
 
 async def create_otos(l):
-    items_arr = []
-    for d in l:
-        items_tuple = set_items_tuple_create_oto_record(d, multi=True)
-        items_arr.append(items_tuple)
-    query = get_insert_query()
     async with AsyncDatabase(**conf) as db:
+        items_arr = []
+        for d in l:
+            items_tuple = set_items_tuple_create_oto_record(d, multi=True)
+            items_arr.append(items_tuple)
+        query = get_insert_query()
         data = await db.executemany(query, items_arr)
+        query = 'SELECT * FROM oto'
+        data = await db.fetch(query)
+        items = []
+        for item in data:
+            nowdt = del_tz(datetime.datetime.now())
+            d = {
+                'operator_number': item['operator_number'],
+                'operator_status': item['operator_status'],
+                'cancel_at': item['cancel_at']
+            }
+            if d['operator_status'] == 'cancel':
+                if d['cancel_at'] is None:
+                    d['cancel_at'] = nowdt
+            else:
+                d['cancel_at'] = None
+            items.append((d['cancel_at'], item['operator_number']))
+        query = 'UPDATE oto SET cancel_at = $1::timestamp where operator_number = $2::int4'
+        data = await db.executemany(query, items)
+        if data is not None:
+            return True
+        else:
+            return None
+
+
+async def update_canceled_otos():
+    query = 'SELECT * FROM oto'
+    async with AsyncDatabase(**conf) as db:
+        data = await db.fetch(query)
+
+    if data is None:
+        return []
+    items = []
+    for item in data:
+        nowdt = del_tz(datetime.datetime.now())
+        d = {
+            'operator_number': item['operator_number'],
+            'operator_status': item['operator_status'],
+            'cancel_at': item['cancel_at']
+        }
+        if d['operator_status'] == 'cancel':
+            if d['cancel_at'] is None:
+                d['cancel_at'] = nowdt
+        else:
+            d['cancel_at'] = None
+        items.append((d['cancel_at'], item['operator_number']))
+    query = 'UPDATE oto SET cancel_at = $1::timestamp where operator_number = $2::int4'
+    async with AsyncDatabase(**conf) as db:
+        data = await db.executemany(query, items)
         if data is not None:
             return True
         else:
