@@ -5,7 +5,7 @@ p = parser.Parser()
 
 
 def root():
-    if len(p.total_els > 0):
+    if len(p.total_els) > 0:
         rem_status = 'OK'
         d = {
             'remoteSrcStatus': rem_status,
