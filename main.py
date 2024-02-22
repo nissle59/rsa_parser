@@ -16,7 +16,7 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    res = service.root()
+    res = json.dumps(service.root(), ensure_ascii=False, indent=4, sort_keys=True, default=str)
     err = {"status": "error"}
     err = json.dumps(err, indent=4, sort_keys=True, default=str)
     if res:
@@ -36,7 +36,7 @@ async def root():
 
 @app.get("/parseToLocal")
 async def parse_to_local():
-    res = service.parse_to_local()
+    res = json.dumps(service.parse_to_local(), ensure_ascii=False, indent=4, sort_keys=True, default=str)
     err = {"status": "error"}
     err = json.dumps(err, indent=4, sort_keys=True, default=str)
     if res:
@@ -56,7 +56,7 @@ async def parse_to_local():
 
 @app.get("/parse")
 async def parse():
-    res = service.parse()
+    res = json.dumps(service.parse(), ensure_ascii=False, indent=4, sort_keys=True, default=str)
     err = {"status": "error"}
     err = json.dumps(err, indent=4, sort_keys=True, default=str)
     if res:
