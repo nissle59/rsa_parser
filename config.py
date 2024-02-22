@@ -17,7 +17,7 @@ r_proxies = cycle(proxies)
 threads = 20
 touched_at = 7
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 handler = logging.FileHandler('app.log')
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -26,5 +26,5 @@ s_handler = logging.StreamHandler(sys.stdout)
 logger = logging.getLogger(__name__)
 logger.addHandler(handler)
 logger.addHandler(s_handler)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 logger.propagate = False
