@@ -56,7 +56,7 @@ async def parse_to_local():
 
 @app.get("/parse")
 async def parse():
-    res = json.dumps(service.parse(), ensure_ascii=False, indent=4, sort_keys=True, default=str)
+    res = json.dumps(await service.parse(), ensure_ascii=False, indent=4, sort_keys=True, default=str)
     err = {"status": "error"}
     err = json.dumps(err, indent=4, sort_keys=True, default=str)
     if res:
