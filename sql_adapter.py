@@ -23,7 +23,7 @@ under_pat = re.compile(r'_([a-z])')
 def get_insert_query():
     query = f"""
                 INSERT INTO 
-                    oto 
+                    dc_base.oto 
                 VALUES (
                     $1::int4,
                     $2,
@@ -123,7 +123,7 @@ def list_detector_to_list(input):
 
 
 async def get_setting(setting_name: str):
-    query = f"SELECT value FROM settings WHERE setting_name = '{setting_name}'"
+    query = f"SELECT value FROM public.settings WHERE setting_name = '{setting_name}'"
 
     async with AsyncDatabase(**conf) as db:
         data = await db.fetch(query)
@@ -157,7 +157,7 @@ async def get_active_proxies(proxy_type: str):
 
 
 async def find_oto(oto_num):
-    query = f"SELECT * FROM oto WHERE operator_number = '{oto_num}'"
+    query = f"SELECT * FROM dc_base.oto WHERE operator_number = '{oto_num}'"
 
     async with AsyncDatabase(**conf) as db:
         data = await db.fetch(query)
@@ -176,9 +176,9 @@ async def scan_otos_to_update():
                     operator_number, 
                     touched_at 
                 from 
-                    oto 
+                    dc_base.oto 
                 where 
-                    oto.operator_name is null 
+                    dc_base.oto.operator_name is null 
                     or (now()-touched_at) >= '{touched_at} days'
             """
 
@@ -210,7 +210,7 @@ async def create_otos(l):
             items_arr.append(items_tuple)
         query = get_insert_query()
         data = await db.executemany(query, items_arr)
-        query = 'SELECT * FROM oto'
+        query = 'SELECT * FROM dc_base.oto'
         data = await db.fetch(query)
         items = []
         for item in data:
@@ -226,7 +226,7 @@ async def create_otos(l):
             else:
                 d['cancel_at'] = None
             items.append((d['cancel_at'], item['operator_number']))
-        query = 'UPDATE oto SET cancel_at = $1::timestamp where operator_number = $2::int4'
+        query = 'UPDATE dc_base.oto SET cancel_at = $1::timestamp where operator_number = $2::int4'
         data = await db.executemany(query, items)
         if data is not None:
             return True
@@ -235,7 +235,7 @@ async def create_otos(l):
 
 
 async def update_canceled_otos():
-    query = 'SELECT * FROM oto'
+    query = 'SELECT * FROM dc_base.oto'
     async with AsyncDatabase(**conf) as db:
         data = await db.fetch(query)
 
@@ -255,7 +255,7 @@ async def update_canceled_otos():
         else:
             d['cancel_at'] = None
         items.append((d['cancel_at'], item['operator_number']))
-    query = 'UPDATE oto SET cancel_at = $1::timestamp where operator_number = $2::int4'
+    query = 'UPDATE dc_base.oto SET cancel_at = $1::timestamp where operator_number = $2::int4'
     async with AsyncDatabase(**conf) as db:
         data = await db.executemany(query, items)
         if data is not None:
