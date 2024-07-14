@@ -58,7 +58,7 @@ async def parse_to_local():
 @app.get("/parse")
 async def parse(background_tasks: BackgroundTasks):
     LOGGER = logging.getLogger(__name__ + ".parse")
-    background_tasks.add_task(service.parse)
+    background_tasks.add_task(await service.parse)
     #res = json.dumps(await service.parse(), ensure_ascii=False, indent=4, sort_keys=True, default=str)
     res = {"status": "success"}
     err = {"status": "error"}
