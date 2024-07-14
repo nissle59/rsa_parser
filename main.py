@@ -61,9 +61,9 @@ async def parse_to_local():
 async def parse(background_tasks: BackgroundTasks):
     LOGGER = logging.getLogger(__name__ + ".parse")
     try:
-        background_tasks.add_task(service.parse)
-        #res = json.dumps(await service.parse(), ensure_ascii=False, indent=4, sort_keys=True, default=str)
-        res = {"status": "success"}
+        #background_tasks.add_task(service.parse)
+        res = json.dumps(await service.parse(), ensure_ascii=False, indent=4, sort_keys=True, default=str)
+        #res = {"status": "success"}
         err = {"status": "error"}
         err = json.dumps(err, indent=4, sort_keys=True, default=str)
     except Exception as e:
