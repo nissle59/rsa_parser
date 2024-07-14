@@ -201,13 +201,13 @@ async def scan_otos_to_update():
         return []
     # config.logger.info(data)
     data = [{'vin': item['vin'], 'createdAt': item['createdAt']} for item in list_detector_to_list(data)]
-    LOGGER.info(data, config.name)
+    LOGGER.info("%s: "+data, config.name)
     return data
 
 
 async def create_oto(d):
     LOGGER = logging.getLogger(__name__ + ".create_oyo")
-    LOGGER.debug(f'{d["operator_name"]} SQL Insert...', config.name)
+    LOGGER.debug("%s: "+f'{d["operator_name"]} SQL Insert...', config.name)
     items_tuple = set_items_tuple_create_oto_record(d, multi=False)
     query = get_insert_query()
     async with AsyncDatabase(**conf) as db:
