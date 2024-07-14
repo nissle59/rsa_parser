@@ -5,6 +5,8 @@ import sys
 from itertools import cycle
 import requests
 
+name = "RSA OTO Parser"
+
 logging.config.dictConfig(json.load(open('logging.json','r')))
 LOGGER = logging.getLogger(__name__)
 
