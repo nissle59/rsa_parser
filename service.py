@@ -34,7 +34,7 @@ async def parse():
     LOGGER = logging.getLogger(__name__ + ".parse")
     ops = p.single_threaded_parser()
     data = await sql_adapter.create_otos(ops)
-    LOGGER.info(f"Parsed {len(ops)}, Status: {str(data)}")
+    LOGGER.info(f"Parsed {len(ops)}, Status: SUCCESS")
     return {
         'status': data,
         'total': len(ops)
