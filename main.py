@@ -2,6 +2,8 @@ import json
 import logging
 from fastapi import FastAPI, responses, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+
+import config
 import service
 
 app = FastAPI()
@@ -58,11 +60,14 @@ async def parse_to_local():
 @app.get("/parse")
 async def parse(background_tasks: BackgroundTasks):
     LOGGER = logging.getLogger(__name__ + ".parse")
-    background_tasks.add_task(service.parse,)
-    #res = json.dumps(await service.parse(), ensure_ascii=False, indent=4, sort_keys=True, default=str)
-    res = {"status": "success"}
-    err = {"status": "error"}
-    err = json.dumps(err, indent=4, sort_keys=True, default=str)
+    try:
+        background_tasks.add_task(service.parse)
+        #res = json.dumps(await service.parse(), ensure_ascii=False, indent=4, sort_keys=True, default=str)
+        res = {"status": "success"}
+        err = {"status": "error"}
+        err = json.dumps(err, indent=4, sort_keys=True, default=str)
+    except Exception as e:
+        LOGGER.critical(e, config.name, exc_info=True)
     if res:
         return responses.Response(
             content=res,
