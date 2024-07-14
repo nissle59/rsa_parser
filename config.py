@@ -1,9 +1,27 @@
+import inspect
 import json
 import logging
 import logging.config
 import sys
 from itertools import cycle
 import requests
+
+
+def cf(level: int = 1):
+    # Получаем стек вызовов
+    stack = inspect.stack()
+    # Имя текущей функции находится в нулевом элементе стека
+    #print(stack[level].frame.f_locals)
+    try:
+        f_name = stack[level].function
+    except IndexError:
+        f_name = 'TOOOOOO Deep =)'
+    try:
+        args = stack[level].frame.f_locals
+    except:
+        args = None
+    return {"name" : f_name, "args" : args}
+
 
 name = "RSA OTO Parser"
 

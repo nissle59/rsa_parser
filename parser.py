@@ -4,11 +4,12 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 import config
+from config import cf
 
 warnings.filterwarnings("ignore")
 class Parser():
     def __init__(self, proxy=None):
-        LOGGER = logging.getLogger(__name__ + ".Parser--init")
+        LOGGER = logging.getLogger(__name__ + "." + cf()['name'])
         self._base_url ='https://oto-register.autoins.ru'
         self.page_url = f'{self._base_url}/tables/oto/?pageNumber='
         first_page = requests.get(
@@ -37,18 +38,18 @@ class Parser():
         self.total_els = self.total_els_ok + self.total_els_bad
 
     def save_operators_json(self, operators, fname='operators.json'):
-        LOGGER = logging.getLogger(__name__ + ".Parser--save_operators_json")
+        LOGGER = logging.getLogger(__name__ + "." + cf()['name'])
         with open(fname, 'w', encoding='utf-8') as f:
             f.write(json.dumps(operators, ensure_ascii=False, indent=2))
 
     def load_operators_json(self, fname='operators.json'):
-        LOGGER = logging.getLogger(__name__ + ".Parser--load_operators_json")
+        LOGGER = logging.getLogger(__name__ + "." + cf()['name'])
         with open(fname, 'r', encoding='utf-8') as f:
             operators = json.loads(f.read())
             return operators
 
     def parse_page(self, url, proxy=None):
-        LOGGER = logging.getLogger(__name__ + ".Parser--parse_page")
+        LOGGER = logging.getLogger(__name__ + "." + cf()['name'])
         try:
             html = requests.get(url, verify=False, proxies=proxy)
         except Exception as e:
@@ -78,7 +79,7 @@ class Parser():
         return arr
 
     def single_threaded_parser(self, proxy=None):
-        LOGGER = logging.getLogger(__name__ + ".Parser--single_threaded_parser")
+        LOGGER = logging.getLogger(__name__ + "." + cf()['name'])
         operators = []
         for page in range(self.total_pages_ok):
             LOGGER.info("%s: "+f'Go {page+1} of {self.total_pages_ok} ok page...', config.name)

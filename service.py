@@ -1,12 +1,12 @@
 import parser
 import sql_adapter
 import logging
-
+from config import cf
 p = parser.Parser()
 
 
 def root():
-    LOGGER = logging.getLogger(__name__ + ".root")
+    LOGGER = logging.getLogger(__name__ + "." + cf()['name'])
     if p.total_els > 0:
         rem_status = 'OK'
         d = {
@@ -22,7 +22,7 @@ def root():
 
 
 def parse_to_local():
-    LOGGER = logging.getLogger(__name__ + ".parse_to_local")
+    LOGGER = logging.getLogger(__name__ + "." + cf()['name'])
     ops = p.single_threaded_parser()
     p.save_operators_json(ops)
     return {
@@ -31,7 +31,7 @@ def parse_to_local():
 
 
 async def parse():
-    LOGGER = logging.getLogger(__name__ + ".parse")
+    LOGGER = logging.getLogger(__name__ + "." + cf()['name'])
     ops = p.single_threaded_parser()
     data = await sql_adapter.create_otos(ops)
     LOGGER.info(f"Parsed {len(ops)}, Status: SUCCESS")
@@ -39,3 +39,6 @@ async def parse():
         'status': data,
         'total': len(ops)
     }
+
+if __name__ == "__main__":
+    parse_to_local()

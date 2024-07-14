@@ -3,7 +3,7 @@ from typing import Optional
 import logging
 import asyncpg
 import config
-
+from config import cf
 
 class ConnectionDBError(Exception):
     ...
@@ -25,7 +25,7 @@ class AsyncDatabase:
     conn: Optional[asyncpg.Connection] = None
 
     async def _connect(self):
-        LOGGER = logging.getLogger(__name__ + ".DB--connect")
+        LOGGER = logging.getLogger(__name__ + "." + cf()['name'])
         if self.conn is not None:
             return True
         try:
@@ -39,24 +39,24 @@ class AsyncDatabase:
         return True
 
     async def _disconnect(self):
-        LOGGER = logging.getLogger(__name__ + ".DB--disconnect")
+        LOGGER = logging.getLogger(__name__ + "." + cf()['name'])
         if self.conn is None:
             return True
         await self.conn.close(timeout=20)
 
     async def __aenter__(self):
-        LOGGER = logging.getLogger(__name__ + ".DB--aenter")
+        LOGGER = logging.getLogger(__name__ + "." + cf()['name'])
         res = await self._connect()
         if res is True:
             return self
         raise ConnectionDBError(res)
 
     async def __aexit__(self, *args):
-        LOGGER = logging.getLogger(__name__ + ".DB--aexit")
+        LOGGER = logging.getLogger(__name__ + "." + cf()['name'])
         await self._disconnect()
 
     async def fetch(self, query: str):
-        LOGGER = logging.getLogger(__name__ + ".DB--fetch")
+        LOGGER = logging.getLogger(__name__ + "." + cf()['name'])
         if self.conn is None:
             raise DBNotConnected('Нет подключения к БД! Используйте в блоке async with!')
 
@@ -69,7 +69,7 @@ class AsyncDatabase:
         return res
 
     async def execute(self, query: str, args) -> bool:
-        LOGGER = logging.getLogger(__name__ + ".DB--execute")
+        LOGGER = logging.getLogger(__name__ + "." + cf()['name'])
         if self.conn is None:
             raise DBNotConnected('Нет подключения к БД! Используйте в блоке async with!')
 
@@ -82,7 +82,7 @@ class AsyncDatabase:
         return res
 
     async def executemany(self, query: str, values=[]):
-        LOGGER = logging.getLogger(__name__ + ".DB--executemany")
+        LOGGER = logging.getLogger(__name__ + "." + cf()['name'])
         if self.conn is None:
             raise DBNotConnected('Нет подключения к БД! Используйте в блоке async with!')
 
