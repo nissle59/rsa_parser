@@ -201,7 +201,7 @@ async def scan_otos_to_update():
         return []
     # config.logger.info(data)
     data = [{'vin': item['vin'], 'createdAt': item['createdAt']} for item in list_detector_to_list(data)]
-    LOGGER.info("%s: "+data, config.name)
+    LOGGER.info("%s: "+ str(data), config.name)
     return data
 
 
