@@ -2,14 +2,16 @@ import datetime
 import re
 import config
 from database import AsyncDatabase
-
+import logging
 
 def del_tz(dt: datetime.datetime):
+    LOGGER = logging.getLogger(__name__ + ".del_tz")
     dt = dt.replace(tzinfo=None)
     return dt
 
 
 def convert_to_ts(s: str):
+    LOGGER = logging.getLogger(__name__ + ".convert_to_ts")
     dt = datetime.datetime.strptime(s, '%Y-%m-%d')
     dt = del_tz(dt)
     # dt = s
@@ -21,6 +23,7 @@ under_pat = re.compile(r'_([a-z])')
 
 
 def get_insert_query():
+    LOGGER = logging.getLogger(__name__ + ".get_insert_query")
     query = f"""
                 INSERT INTO 
                     dc_base.oto 
@@ -48,6 +51,7 @@ def get_insert_query():
 
 
 def set_items_tuple_create_oto_record(d, multi=False):
+    LOGGER = logging.getLogger(__name__ + ".set_items_tuple_create_oto_record")
     nowdt = del_tz(datetime.datetime.now())
     if d['operator_status'] == 'ok':
         d['cancel_at'] = None
@@ -83,10 +87,12 @@ def set_items_tuple_create_oto_record(d, multi=False):
 
 
 def camel_to_underscore(name):
+    LOGGER = logging.getLogger(__name__ + ".camel_to_underscore")
     return camel_pat.sub(lambda x: '_' + x.group(1).lower(), name)
 
 
 def underscore_to_camel(name):
+    LOGGER = logging.getLogger(__name__ + ".underscore_to_camel")
     return under_pat.sub(lambda x: x.group(1).upper(), name)
 
 
@@ -94,6 +100,7 @@ conf = config.DATABASE
 
 
 def list_detector(input):
+    LOGGER = logging.getLogger(__name__ + ".list_detector")
     new_data = {}
     if isinstance(input, list):
         data = [dict(record) for record in input][0]
@@ -105,6 +112,7 @@ def list_detector(input):
 
 
 def list_detector_to_list(input):
+    LOGGER = logging.getLogger(__name__ + ".list_detector_to_list")
     if isinstance(input, list):
         new_data = []
         # data = [dict(record) for record in input]
@@ -123,6 +131,7 @@ def list_detector_to_list(input):
 
 
 async def get_setting(setting_name: str):
+    LOGGER = logging.getLogger(__name__ + ".get_setting")
     query = f"SELECT value FROM public.settings WHERE setting_name = '{setting_name}'"
 
     async with AsyncDatabase(**conf) as db:
@@ -137,6 +146,7 @@ async def get_setting(setting_name: str):
 
 
 async def get_active_proxies(proxy_type: str):
+    LOGGER = logging.getLogger(__name__ + ".get_active_proxies")
     if proxy_type == "HTTPS":
         t_name = 'https_active_proxies'
     elif proxy_type == 'SOCKS5':
@@ -157,6 +167,7 @@ async def get_active_proxies(proxy_type: str):
 
 
 async def find_oto(oto_num):
+    LOGGER = logging.getLogger(__name__ + ".find_oto")
     query = f"SELECT * FROM dc_base.oto WHERE operator_number = '{oto_num}'"
 
     async with AsyncDatabase(**conf) as db:
@@ -171,6 +182,7 @@ async def find_oto(oto_num):
 
 
 async def scan_otos_to_update():
+    LOGGER = logging.getLogger(__name__ + ".scan_otos_to_update")
     touched_at = config.touched_at
     query = f"""select 
                     operator_number, 
@@ -189,12 +201,13 @@ async def scan_otos_to_update():
         return []
     # config.logger.info(data)
     data = [{'vin': item['vin'], 'createdAt': item['createdAt']} for item in list_detector_to_list(data)]
-    config.logger.info(data)
+    LOGGER.info(data)
     return data
 
 
 async def create_oto(d):
-    config.logger.debug(f'{d["operator_name"]} SQL Insert...')
+    LOGGER = logging.getLogger(__name__ + ".create_oyo")
+    LOGGER.debug(f'{d["operator_name"]} SQL Insert...')
     items_tuple = set_items_tuple_create_oto_record(d, multi=False)
     query = get_insert_query()
     async with AsyncDatabase(**conf) as db:
@@ -203,6 +216,7 @@ async def create_oto(d):
 
 
 async def create_otos(l):
+    LOGGER = logging.getLogger(__name__ + ".create_otos")
     async with AsyncDatabase(**conf) as db:
         items_arr = []
         for d in l:
@@ -235,6 +249,7 @@ async def create_otos(l):
 
 
 async def update_canceled_otos():
+    LOGGER = logging.getLogger(__name__ + ".update_canceled_otos")
     query = 'SELECT * FROM dc_base.oto'
     async with AsyncDatabase(**conf) as db:
         data = await db.fetch(query)

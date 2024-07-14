@@ -1,10 +1,12 @@
 import parser
 import sql_adapter
+import logging
 
 p = parser.Parser()
 
 
 def root():
+    LOGGER = logging.getLogger(__name__ + ".root")
     if p.total_els > 0:
         rem_status = 'OK'
         d = {
@@ -20,6 +22,7 @@ def root():
 
 
 def parse_to_local():
+    LOGGER = logging.getLogger(__name__ + ".parse_to_local")
     ops = p.single_threaded_parser()
     p.save_operators_json(ops)
     return {
@@ -28,6 +31,7 @@ def parse_to_local():
 
 
 async def parse():
+    LOGGER = logging.getLogger(__name__ + ".parse")
     ops = p.single_threaded_parser()
     data = await sql_adapter.create_otos(ops)
     return {

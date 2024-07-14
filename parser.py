@@ -1,14 +1,14 @@
 import json
 import warnings
-
+import logging
 import requests
 from bs4 import BeautifulSoup
-
 import config
 
 warnings.filterwarnings("ignore")
 class Parser():
     def __init__(self, proxy=None):
+        LOGGER = logging.getLogger(__name__ + ".Parser--init")
         self._base_url ='https://oto-register.autoins.ru'
         self.page_url = f'{self._base_url}/tables/oto/?pageNumber='
         first_page = requests.get(
@@ -37,16 +37,23 @@ class Parser():
         self.total_els = self.total_els_ok + self.total_els_bad
 
     def save_operators_json(self, operators, fname='operators.json'):
+        LOGGER = logging.getLogger(__name__ + ".Parser--save_operators_json")
         with open(fname, 'w', encoding='utf-8') as f:
             f.write(json.dumps(operators, ensure_ascii=False, indent=2))
 
     def load_operators_json(self, fname='operators.json'):
+        LOGGER = logging.getLogger(__name__ + ".Parser--load_operators_json")
         with open(fname, 'r', encoding='utf-8') as f:
             operators = json.loads(f.read())
             return operators
 
     def parse_page(self, url, proxy=None):
-        html = requests.get(url, verify=False, proxies=proxy)
+        LOGGER = logging.getLogger(__name__ + ".Parser--parse_page")
+        try:
+            html = requests.get(url, verify=False, proxies=proxy)
+        except Exception as e:
+            LOGGER.error()
+            return []
         soup = BeautifulSoup(html.text, features="html.parser")
         table = soup.select('.table>tbody>tr')
         arr = []
@@ -71,14 +78,15 @@ class Parser():
         return arr
 
     def single_threaded_parser(self, proxy=None):
+        LOGGER = logging.getLogger(__name__ + ".Parser--single_threaded_parser")
         operators = []
         for page in range(self.total_pages_ok):
-            config.logger.debug(f'Go {page+1} of {self.total_pages_ok} ok page...')
+            LOGGER.debug(f'Go {page+1} of {self.total_pages_ok} ok page...')
             url = f'{self._base_url}/tables/oto/?pageNumber={page+1}'
             operators.extend(self.parse_page(url,proxy))
 
         for page in range(self.total_pages_bad):
-            config.logger.debug(f'Go {page+1} of {self.total_pages_bad} bad page...')
+            LOGGER.debug(f'Go {page+1} of {self.total_pages_bad} bad page...')
             url = f'{self._base_url}/search/oto/{page+1}?otoId=&shortName=&address=&fio=&showCanceled=true'
             operators.extend(self.parse_page(url, proxy))
 

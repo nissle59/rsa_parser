@@ -1,8 +1,7 @@
 import json
-
+import logging
 from fastapi import FastAPI, responses
 from fastapi.middleware.cors import CORSMiddleware
-
 import service
 
 app = FastAPI()
@@ -16,6 +15,7 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
+    LOGGER = logging.getLogger(__name__ + ".root")
     res = json.dumps(service.root(), ensure_ascii=False, indent=4, sort_keys=True, default=str)
     err = {"status": "error"}
     err = json.dumps(err, indent=4, sort_keys=True, default=str)
@@ -36,6 +36,7 @@ async def root():
 
 @app.get("/parseToLocal")
 async def parse_to_local():
+    LOGGER = logging.getLogger(__name__ + ".parseToLocal")
     res = json.dumps(service.parse_to_local(), ensure_ascii=False, indent=4, sort_keys=True, default=str)
     err = {"status": "error"}
     err = json.dumps(err, indent=4, sort_keys=True, default=str)
@@ -56,6 +57,7 @@ async def parse_to_local():
 
 @app.get("/parse")
 async def parse():
+    LOGGER = logging.getLogger(__name__ + ".parse")
     res = json.dumps(await service.parse(), ensure_ascii=False, indent=4, sort_keys=True, default=str)
     err = {"status": "error"}
     err = json.dumps(err, indent=4, sort_keys=True, default=str)
