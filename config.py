@@ -1,10 +1,7 @@
 import inspect
 import json
-import logging
 import logging.config
-import sys
 from itertools import cycle
-import requests
 
 
 def cf(level: int = 1):
@@ -29,7 +26,7 @@ logging.config.dictConfig(json.load(open('logging.json','r')))
 LOGGER = logging.getLogger(__name__)
 
 DATABASE = {
-    'host': 'db.local',
+    'host': 'pg.db.services.local',
     'port': 5432,
     'user': 'postgres',
     'pswd': 'psqlpass',
